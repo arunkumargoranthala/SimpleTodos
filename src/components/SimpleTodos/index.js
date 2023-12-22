@@ -1,6 +1,8 @@
-import {Component} from 'react'
-import './index.css'
-import TodoItem from '../TodoItem'
+// SimpleTodos.js
+/* eslint-disable prettier/prettier */
+import React, { Component } from 'react';
+import './index.css';
+import TodoItem from '../TodoItem';
 
 const initialTodosList = [
   {
@@ -38,31 +40,84 @@ const initialTodosList = [
 ]
 
 class SimpleTodos extends Component {
-  state = {mainList: initialTodosList}
+  state = { mainList: initialTodosList, inputValue: '' };
 
-  DeleteItem = id => {
-    const {mainList} = this.state
-    const finalTodoList = mainList.filter(each => each.id !== id)
-    this.setState({mainList: finalTodoList})
-  }
+  deleteItem = (id) => {
+    const { mainList } = this.state;
+    const finalTodoList = mainList.filter((each) => each.id !== id);
+    this.setState({ mainList: finalTodoList });
+  };
+
+  editItem = (id) => {
+    const { mainList } = this.state;
+    const updatedList = mainList.map((item) => {
+      if (item.id === id) {
+        return { ...item, editing: true };
+      }
+      return item;
+    });
+    this.setState({ mainList: updatedList });
+  };
+
+  saveItem = (id, updatedText) => {
+  const { mainList } = this.state;
+  const updatedList = mainList.map((item) => {
+    if (item.id === id) {
+      return { ...item, title: updatedText, editing: false };
+    }
+    return item;
+  });
+  this.setState({ mainList: updatedList });
+};
+
+  handleInputChange = (event) => {
+    this.setState({ inputValue: event.target.value });
+  };
+
+  handleAddTodo = () => {
+    const { inputValue } = this.state;
+    const numberOfTodos = parseInt(inputValue.match(/\d+$/)?.[0]) || 1;
+
+    if (inputValue.trim() !== '') {
+      const newTodos = Array.from({ length: numberOfTodos }, (_, index) => ({
+        id: initialTodosList.length + index + 1,
+        title: inputValue.trim(),
+      }));
+
+      this.setState((prevState) => ({
+        mainList: [...prevState.mainList, ...newTodos],
+        inputValue: '',
+      }));
+    }
+  };
 
   render() {
-    const {mainList} = this.state
+    const { mainList, inputValue } = this.state;
 
     return (
       <div>
+        <h1>Simple Todos</h1>
+        <input
+          type="text"
+          value={inputValue}
+          onChange={this.handleInputChange}
+          placeholder="Enter todo text"
+        />
+        <button onClick={this.handleAddTodo}>Add</button>
         <ul>
-          {mainList.map(eachUser => (
+          {mainList.map((eachUser) => (
             <TodoItem
               items={eachUser}
               key={eachUser.id}
-              DeleteItem={this.DeleteItem}
+              deleteItem={this.deleteItem}
+              editItem={this.editItem}
+              saveItem={this.saveItem}
             />
           ))}
         </ul>
       </div>
-    )
+    );
   }
 }
 
-export default SimpleTodos
+export default SimpleTodos;
